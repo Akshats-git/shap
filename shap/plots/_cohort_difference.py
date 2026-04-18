@@ -7,7 +7,6 @@ import numpy as np
 
 from .. import Cohorts, Explanation
 from ..utils._exceptions import DimensionError
-from . import colors
 from ._style import get_style
 
 
