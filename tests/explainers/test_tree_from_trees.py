@@ -387,13 +387,6 @@ def test_from_trees_roundtrip_pyspark(configure_pyspark_python):
     for classifier in classifiers:
         model = classifier.fit(iris)
         existing, rebuilt = _roundtrip_tree_ensemble(model, X, data_missing=None, model_output="raw")
-        predictions = (
-            model.transform(iris)
-            .select("rawPrediction")
-            .rdd.map(lambda x: [float(y) for y in x["rawPrediction"]])
-            .toDF(["class0", "class1"])
-            .toPandas()
-        )
         np.testing.assert_allclose(existing.predict(X), rebuilt.predict(X), err_msg=str(type(model)))
 
         sample = X.iloc[:10]
