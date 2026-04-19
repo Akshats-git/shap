@@ -1,10 +1,11 @@
 """Tests for TreeEnsemble.from_trees."""
 
+import sys
+
 import numpy as np
 import pandas as pd
 import pytest
 import sklearn
-import sys
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
@@ -114,7 +115,9 @@ def test_from_trees_roundtrip_supported_sklearn_models():
         sample = X.iloc[:10] if isinstance(X, pd.DataFrame) else X[:10]
         existing_explanation = shap.TreeExplainer(existing, data=X, feature_perturbation="interventional")(sample)
         rebuilt_explanation = shap.TreeExplainer(rebuilt, data=X, feature_perturbation="interventional")(sample)
-        np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6)
+        np.testing.assert_allclose(
+            existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6
+        )
         _assert_explanation_additivity(existing_explanation, existing.predict(sample), err_msg=case_name)
         _assert_explanation_additivity(rebuilt_explanation, rebuilt.predict(sample), err_msg=case_name)
 
@@ -139,7 +142,9 @@ def test_from_trees_roundtrip_isolation_forest_models():
         sample = X.iloc[:10] if isinstance(X, pd.DataFrame) else X[:10]
         existing_explanation = shap.TreeExplainer(existing, feature_perturbation="tree_path_dependent")(sample)
         rebuilt_explanation = shap.TreeExplainer(rebuilt, feature_perturbation="tree_path_dependent")(sample)
-        np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6)
+        np.testing.assert_allclose(
+            existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6
+        )
         np.testing.assert_allclose(
             existing_explanation.base_values,
             rebuilt_explanation.base_values,
@@ -202,7 +207,9 @@ def test_from_trees_roundtrip_optional_models():
         sample = X.iloc[:10] if isinstance(X, pd.DataFrame) else X[:10]
         existing_explanation = shap.TreeExplainer(existing, data=X, feature_perturbation="interventional")(sample)
         rebuilt_explanation = shap.TreeExplainer(rebuilt, data=X, feature_perturbation="interventional")(sample)
-        np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6)
+        np.testing.assert_allclose(
+            existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6
+        )
         _assert_explanation_additivity(existing_explanation, existing.predict(sample), err_msg=case_name)
         _assert_explanation_additivity(rebuilt_explanation, rebuilt.predict(sample), err_msg=case_name)
 
@@ -238,7 +245,11 @@ def test_from_trees_roundtrip_smaller_tree_libraries():
     cases.append(
         (
             "lightgbm_booster",
-            lightgbm.train(params={"objective": "regression", "learning_rate": 0.1, "verbose": -1}, train_set=lgb_train, num_boost_round=5),
+            lightgbm.train(
+                params={"objective": "regression", "learning_rate": 0.1, "verbose": -1},
+                train_set=lgb_train,
+                num_boost_round=5,
+            ),
             X,
             None,
             "raw",
@@ -288,12 +299,16 @@ def test_from_trees_roundtrip_smaller_tree_libraries():
     )
 
     for case_name, model, X_case, data_missing, model_output in cases:
-        existing, rebuilt = _roundtrip_tree_ensemble(model, X_case, data_missing=data_missing, model_output=model_output)
+        existing, rebuilt = _roundtrip_tree_ensemble(
+            model, X_case, data_missing=data_missing, model_output=model_output
+        )
         np.testing.assert_allclose(existing.predict(X_case), rebuilt.predict(X_case), err_msg=case_name)
         sample = X_case.iloc[:10] if isinstance(X_case, pd.DataFrame) else X_case[:10]
         existing_explanation = shap.TreeExplainer(existing, data=X_case, feature_perturbation="interventional")(sample)
         rebuilt_explanation = shap.TreeExplainer(rebuilt, data=X_case, feature_perturbation="interventional")(sample)
-        np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6)
+        np.testing.assert_allclose(
+            existing_explanation.values, rebuilt_explanation.values, err_msg=case_name, atol=1e-6
+        )
         _assert_explanation_additivity(existing_explanation, existing.predict(sample), err_msg=case_name)
         _assert_explanation_additivity(rebuilt_explanation, rebuilt.predict(sample), err_msg=case_name)
 
@@ -315,7 +330,9 @@ def test_from_trees_roundtrip_gpboost():
     existing_explanation = shap.TreeExplainer(existing, feature_perturbation="tree_path_dependent")(sample)
     rebuilt_explanation = shap.TreeExplainer(rebuilt, feature_perturbation="tree_path_dependent")(sample)
     np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg="gpboost", atol=1e-6)
-    np.testing.assert_allclose(existing_explanation.base_values, rebuilt_explanation.base_values, err_msg="gpboost", atol=1e-6)
+    np.testing.assert_allclose(
+        existing_explanation.base_values, rebuilt_explanation.base_values, err_msg="gpboost", atol=1e-6
+    )
 
 
 def test_from_trees_roundtrip_pyod_iforest():
@@ -333,8 +350,12 @@ def test_from_trees_roundtrip_pyod_iforest():
     sample = X[:10]
     existing_explanation = shap.TreeExplainer(existing, feature_perturbation="tree_path_dependent")(sample)
     rebuilt_explanation = shap.TreeExplainer(rebuilt, feature_perturbation="tree_path_dependent")(sample)
-    np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg="pyod_iforest", atol=1e-6)
-    np.testing.assert_allclose(existing_explanation.base_values, rebuilt_explanation.base_values, err_msg="pyod_iforest", atol=1e-6)
+    np.testing.assert_allclose(
+        existing_explanation.values, rebuilt_explanation.values, err_msg="pyod_iforest", atol=1e-6
+    )
+    np.testing.assert_allclose(
+        existing_explanation.base_values, rebuilt_explanation.base_values, err_msg="pyod_iforest", atol=1e-6
+    )
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="fails due to OOM errors, see #4021")
@@ -342,7 +363,9 @@ def test_from_trees_roundtrip_pyspark(configure_pyspark_python):
     pyspark = pytest.importorskip("pyspark")
     pytest.importorskip("pyspark.ml")
     try:
-        spark = pyspark.sql.SparkSession.builder.config(conf=pyspark.SparkConf().set("spark.master", "local[*]")).getOrCreate()
+        spark = pyspark.sql.SparkSession.builder.config(
+            conf=pyspark.SparkConf().set("spark.master", "local[*]")
+        ).getOrCreate()
     except Exception:
         pytest.skip("Could not create pyspark context")
 
@@ -377,16 +400,21 @@ def test_from_trees_roundtrip_pyspark(configure_pyspark_python):
         existing_explanation = shap.TreeExplainer(existing, feature_perturbation="tree_path_dependent")(sample)
         rebuilt_explanation = shap.TreeExplainer(rebuilt, feature_perturbation="tree_path_dependent")(sample)
         np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg=str(type(model)))
-        np.testing.assert_allclose(existing_explanation.base_values, rebuilt_explanation.base_values, err_msg=str(type(model)))
+        np.testing.assert_allclose(
+            existing_explanation.base_values, rebuilt_explanation.base_values, err_msg=str(type(model))
+        )
 
     regressors = [
         pyspark.ml.regression.GBTRegressor(labelCol="sepal_length", featuresCol="features"),
         pyspark.ml.regression.RandomForestRegressor(labelCol="sepal_length", featuresCol="features"),
         pyspark.ml.regression.DecisionTreeRegressor(labelCol="sepal_length", featuresCol="features"),
     ]
-    iris_reg = spark.createDataFrame(pd.DataFrame(data=np.c_[iris_sk["data"], iris_sk["target"]], columns=iris_sk["feature_names"] + ["target"])[
-        :100
-    ], col).drop("type")
+    iris_reg = spark.createDataFrame(
+        pd.DataFrame(data=np.c_[iris_sk["data"], iris_sk["target"]], columns=iris_sk["feature_names"] + ["target"])[
+            :100
+        ],
+        col,
+    ).drop("type")
     iris_reg = pyspark.ml.feature.VectorAssembler(inputCols=col[1:-1], outputCol="features").transform(iris_reg)
     X_reg = pd.DataFrame(data=iris_sk.data, columns=iris_sk.feature_names).drop("sepal length (cm)", axis=1)[:100]
     for regressor in regressors:
@@ -398,6 +426,8 @@ def test_from_trees_roundtrip_pyspark(configure_pyspark_python):
         existing_explanation = shap.TreeExplainer(existing, feature_perturbation="tree_path_dependent")(sample)
         rebuilt_explanation = shap.TreeExplainer(rebuilt, feature_perturbation="tree_path_dependent")(sample)
         np.testing.assert_allclose(existing_explanation.values, rebuilt_explanation.values, err_msg=str(type(model)))
-        np.testing.assert_allclose(existing_explanation.base_values, rebuilt_explanation.base_values, err_msg=str(type(model)))
+        np.testing.assert_allclose(
+            existing_explanation.base_values, rebuilt_explanation.base_values, err_msg=str(type(model))
+        )
 
     spark.stop()

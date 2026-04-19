@@ -977,7 +977,7 @@ class TreeEnsemble:
         num_stacked_models: int = 1,
         cat_feature_indices: npt.NDArray[Any] | None = None,
         model_type: str = "internal",
-    ) -> "TreeEnsemble":
+    ) -> TreeEnsemble:
         """Build a TreeEnsemble from pre-extracted trees.
 
         The trees may be provided either as native sklearn tree objects or as
@@ -988,7 +988,10 @@ class TreeEnsemble:
 
         ensemble = cls.__new__(cls)
         ensemble.model_type = model_type
-        ensemble.trees = [tree if isinstance(tree, SingleTree) else SingleTree(tree, data=data, data_missing=data_missing) for tree in trees]
+        ensemble.trees = [
+            tree if isinstance(tree, SingleTree) else SingleTree(tree, data=data, data_missing=data_missing)
+            for tree in trees
+        ]
         ensemble.base_offset = base_offset
         ensemble.model_output = model_output
         ensemble.objective = objective
@@ -1088,7 +1091,9 @@ class TreeEnsemble:
                 "causalml.inference.tree.CausalRandomForestRegressor",
             ],
         ):
-            if not safe_isinstance(model, ["sklearn.ensemble.RandomForestRegressor", "sklearn.ensemble.forest.RandomForestRegressor"]):
+            if not safe_isinstance(
+                model, ["sklearn.ensemble.RandomForestRegressor", "sklearn.ensemble.forest.RandomForestRegressor"]
+            ):
                 warnings.warn(
                     "Support for econml and causalml tree models is deprecated and will be removed in a future release. "
                     "Please export the trees and use TreeEnsemble.from_trees instead.",
@@ -1135,7 +1140,9 @@ class TreeEnsemble:
                 "skopt.learning.forest.ExtraTreesRegressor",
             ],
         ):
-            if safe_isinstance(model, ["skopt.learning.forest.RandomForestRegressor", "skopt.learning.forest.ExtraTreesRegressor"]):
+            if safe_isinstance(
+                model, ["skopt.learning.forest.RandomForestRegressor", "skopt.learning.forest.ExtraTreesRegressor"]
+            ):
                 warnings.warn(
                     "Support for scikit-optimize tree models is deprecated and will be removed in a future release. "
                     "Please export the trees and use TreeEnsemble.from_trees instead.",
@@ -1160,7 +1167,9 @@ class TreeEnsemble:
                 "causalml.inference.tree.causal.causaltree.CausalTreeRegressor",
             ],
         ):
-            if not safe_isinstance(model, ["sklearn.tree.DecisionTreeRegressor", "sklearn.tree.tree.DecisionTreeRegressor"]):
+            if not safe_isinstance(
+                model, ["sklearn.tree.DecisionTreeRegressor", "sklearn.tree.tree.DecisionTreeRegressor"]
+            ):
                 warnings.warn(
                     "Support for econml and causalml tree models is deprecated and will be removed in a future release. "
                     "Please export the trees and use TreeEnsemble.from_trees instead.",
